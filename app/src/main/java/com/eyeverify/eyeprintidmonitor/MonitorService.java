@@ -26,7 +26,8 @@ import java.util.TimerTask;
  */
 public class MonitorService extends Service {
 
-    public static final String TAG = MonitorService.class.getSimpleName();
+//    public static final String TAG = MonitorService.class.getSimpleName();
+    public static final String TAG = "yyz";
 
     enum AppStatus { UNKNOWN, STOPPED, STARTING, RUNNING_FG, RUNNING_BG }
 
@@ -123,6 +124,12 @@ public class MonitorService extends Service {
                     } else {
                         mCurStatus = AppStatus.STOPPED;
                         //  TODO start the data collection app
+                    }
+
+                    Intent launchIntent = getPackageManager().getLaunchIntentForPackage(mPackageId);
+                    //  null pointer check in case package name was not found
+                    if (launchIntent != null) {
+                        startActivity(launchIntent);
                     }
                 }
 

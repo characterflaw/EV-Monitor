@@ -7,10 +7,9 @@ import android.content.Intent;
 import android.content.ServiceConnection;
 import android.os.Bundle;
 import android.os.IBinder;
+import android.text.Editable;
+import android.text.TextWatcher;
 import android.util.Log;
-import android.view.View;
-import android.view.ViewGroup;
-import android.widget.Button;
 import android.widget.CheckBox;
 import android.widget.CompoundButton;
 import android.widget.EditText;
@@ -18,9 +17,10 @@ import android.widget.EditText;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener{
+public class MainActivity extends Activity implements CompoundButton.OnCheckedChangeListener {
 
-    public static final String TAG = MainActivity.class.getSimpleName();
+//    public static final String TAG = MainActivity.class.getSimpleName();
+    public static final String TAG = "jmd";
 
     private String mPackageId;
 
@@ -39,6 +39,26 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
         setContentView(R.layout.activity_main); // TODO: provide your layout
 
         mEtPackageId = (EditText)findViewById(R.id.etPackageId);
+        mEtPackageId.addTextChangedListener(new TextWatcher() {
+
+            public void afterTextChanged(Editable s) {
+
+                if (Utility.validatePackageId(s.toString())) {
+                    Log.d("MonitorService", "Package ID was valid, starting service...");
+                    mCbMonitor.setEnabled(true);
+                } else {
+                    Log.d("MonitorService", "String does not look like a valid Package ID");
+                    mCbMonitor.setEnabled(false);
+                }
+//                mEtPackageId.
+
+            }
+
+            public void beforeTextChanged(CharSequence s, int start, int count, int after) {}
+
+            public void onTextChanged(CharSequence s, int start, int before, int count) {}
+        });
+
         mCbMonitor = (CheckBox)findViewById(R.id.cbMonitor);
         mCbMonitor.setOnCheckedChangeListener(this);
 
@@ -58,12 +78,13 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
 //            mBackgroundService.setCallback(null);
 //            mBackgroundService.setPackageId("com.eyeverify.evsample");
             mBackgroundService.enableMonitor(false);
+            Log.d(TAG, "MainActivity::ServicConnection: Connected");
             mBackgroundService.start();
         }
 
         @Override
-        public void onServiceDisconnected(ComponentName className)
-        {
+        public void onServiceDisconnected(ComponentName className) {
+            Log.d(TAG, "MainActivity::ServicConnection: disconnected");
             mBackgroundService = null;
         }
     };
@@ -90,17 +111,18 @@ public class MainActivity extends Activity implements CompoundButton.OnCheckedCh
     public void onCheckedChanged(CompoundButton buttonView, boolean isChecked) {
         if (mBackgroundService != null) {
             String pid = mEtPackageId.getText().toString();
-            if (!isChecked) {
-                if (Utility.validatePackageId(pid)) {
+            if (isChecked) {
+//                if (Utility.validatePackageId(pid)) {
                     mPackageId = pid;
                     mBackgroundService.setPackageId(mPackageId);
-                    mBackgroundService.enableMonitor(isChecked);
-                } else {
-                    Log.d(TAG, "String does not look like a valid Package ID");
-                }
-            } else {
-                mBackgroundService.enableMonitor(false);
+//                    Log.d("MonitorService", "Package ID was valid, starting service...");
+//
+//                } else {
+//                    Log.d("MonitorService", "String does not look like a valid Package ID");
+//                }
             }
+
+            mBackgroundService.enableMonitor(isChecked);
         }
     }
 
